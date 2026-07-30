@@ -1,0 +1,8 @@
+DirectoryIndex index.php login.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(config|database|device|docs|tools)(/|$) - [F,L]
+    RewriteRule ^(info|test)\.php$ - [F,L]
+    RewriteRule (^|/)(\.env|\.gitignore|.*\.sql)$ - [F,L]
+</IfModule>
