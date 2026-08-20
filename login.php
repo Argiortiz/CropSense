@@ -13,8 +13,10 @@ cropsense_apply_security_headers("web");
 
     <title>CropSense | Login</title>
 
+    <meta name="theme-color" content="#123d2f">
+
     <!-- Favicon -->
-    <link rel="icon" href="/assets/img/favicon.png">
+    <link rel="icon" href="/assets/img/cropsense-logo.svg" type="image/svg+xml">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,6 +26,7 @@ cropsense_apply_security_headers("web");
 
     <!-- Login CSS -->
     <link rel="stylesheet" href="/assets/css/login.css?v=20260716-command2">
+    <link rel="stylesheet" href="/assets/css/design-system.css?v=20260817-ui-refresh">
 </head>
 
 <body>
@@ -43,9 +46,7 @@ cropsense_apply_security_headers("web");
         <section class="brand-area" aria-label="CropSense introduction">
             <div class="brand-lockup">
                 <div class="brand-logo" aria-hidden="true">
-                    <i class="bi bi-wifi signal-icon"></i>
-                    <i class="bi bi-leaf-fill leaf-icon"></i>
-                    <span></span>
+                    <img src="/assets/img/cropsense-logo.svg" alt="">
                 </div>
 
                 <div>
@@ -61,7 +62,6 @@ cropsense_apply_security_headers("web");
                     Turn live soil readings into clear crop decisions with a secure,
                     farmer-friendly monitoring dashboard.
                 </p>
-            </div>
             </div>
 
             <div class="feature-list" aria-label="CropSense features">
@@ -100,7 +100,7 @@ cropsense_apply_security_headers("web");
 
             <div class="login-card">
                 <div class="card-icon">
-                    <i class="bi bi-flower1"></i>
+                    <img src="/assets/img/cropsense-logo.svg" alt="">
                 </div>
 
                 <div class="card-heading">
