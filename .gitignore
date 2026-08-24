@@ -1,13 +1,14 @@
 # Local configuration and secrets
 config/database.local.php
 config/security.local.php
+config/mail.local.php
 .env
 .env.*
 
 # ESP32 Wi-Fi credentials and API keys
 device/**/secrets.h
 
-# Deployment files
+# Deployment filesgit check-ignore -v -- device/CropSense_ESP32_Dashboard/secrets.h
 deploy/
 
 # Runtime uploads
