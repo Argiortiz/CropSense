@@ -84,7 +84,7 @@ include "includes/header.php";
                     Field Collection Records
                 </span>
                 <h2>Review collected soil sensor data.</h2>
-                <p>Monitor pH, EC, NPK, temperature, and moisture records from connected field devices.</p>
+                <p>Monitor pH, EC, NPK, soil temperature, and moisture records from connected field devices.</p>
             </div>
 
             <a class="download-action" href="export_collected_data.php?range=<?php echo urlencode($selectedRange); ?>">
@@ -128,7 +128,7 @@ include "includes/header.php";
                             <th>N</th>
                             <th>P</th>
                             <th>K</th>
-                            <th>Temp</th>
+                            <th>Soil Temp</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -149,7 +149,7 @@ include "includes/header.php";
                                 <td><?php echo number_format((float) $reading["nitrogen"], 0); ?></td>
                                 <td><?php echo number_format((float) $reading["phosphorus"], 0); ?></td>
                                 <td><?php echo number_format((float) $reading["potassium"], 0); ?></td>
-                                <td><?php echo number_format((float) $reading["temperature"], 1); ?> C</td>
+                                <td><?php echo number_format((float) $reading["temperature"], 1); ?> °C</td>
                             </tr>
                         <?php endforeach; ?>
 

@@ -22,18 +22,58 @@ $dashboardCrops = array_intersect_key(
     $dashboardCropConfig["crops"] ?? [],
     array_flip(["rice", "corn", "tobacco"])
 );
+$dashboardNpkClassification = $dashboardCropConfig["npk_classification"] ?? [];
+$dashboardSuitability = cropsense_assess_crop_suitability($conn, $latestSensorReading);
 $dashboardCropIcons = [
     "rice" => "bi-droplet-half",
     "corn" => "bi-flower1",
     "tobacco" => "bi-wind",
 ];
+function dashboard_sensor_value($reading, $key)
+{
+    if (
+        !$reading ||
+        !array_key_exists($key, $reading) ||
+        $reading[$key] === null ||
+        trim((string) $reading[$key]) === "" ||
+        !is_numeric($reading[$key])
+    ) {
+        return null;
+    }
+
+    return (float) $reading[$key];
+}
+
 function dashboard_number($reading, $key, $digits = 0)
 {
-    if (!$reading || !isset($reading[$key]) || !is_numeric($reading[$key])) {
+    $value = dashboard_sensor_value($reading, $key);
+
+    return $value === null ? "--" : number_format($value, $digits);
+}
+
+function dashboard_telemetry_number($reading, $key, $maxDigits = 2)
+{
+    $value = dashboard_sensor_value($reading, $key);
+
+    if ($value === null) {
         return "--";
     }
 
-    return number_format((float) $reading[$key], $digits);
+    return rtrim(rtrim(number_format($value, $maxDigits, ".", ""), "0"), ".");
+}
+
+function dashboard_raw_sensor_value($reading, $key)
+{
+    if (
+        !$reading ||
+        !array_key_exists($key, $reading) ||
+        $reading[$key] === null ||
+        (is_string($reading[$key]) && trim($reading[$key]) === "")
+    ) {
+        return null;
+    }
+
+    return (string) $reading[$key];
 }
 
 function dashboard_relative_time($seconds)
@@ -64,15 +104,13 @@ function dashboard_status_text($reading, $ageSeconds, $liveText = "Updated")
 }
 
 $sensorUpdatedText = $sensorSnapshot["is_valid"] ? dashboard_status_text($latestSensorReading, $sensorAgeSeconds) : "Invalid sensor reading";
-$sensorPh = $latestSensorReading && (float) $latestSensorReading["soil_ph"] > 0
-    ? dashboard_number($latestSensorReading, "soil_ph", 1)
-    : "--";
+$sensorPh = dashboard_telemetry_number($latestSensorReading, "soil_ph");
 $sensorPhStatus = $sensorPh === "--" ? "pH sensor not connected" : $sensorUpdatedText;
 $sensorEc = dashboard_number($latestSensorReading, "soil_ec");
 $sensorEcStatus = $latestSensorReading ? $sensorUpdatedText : "Electrical conductivity";
-$sensorNpk = dashboard_number($latestSensorReading, "nitrogen")
-    . " / " . dashboard_number($latestSensorReading, "phosphorus")
-    . " / " . dashboard_number($latestSensorReading, "potassium");
+$sensorNpk = (dashboard_raw_sensor_value($latestSensorReading, "nitrogen") ?? "--")
+    . " / " . (dashboard_raw_sensor_value($latestSensorReading, "phosphorus") ?? "--")
+    . " / " . (dashboard_raw_sensor_value($latestSensorReading, "potassium") ?? "--");
 $sensorActivityTitle = $latestSensorReading
     ? ($sensorIsLive ? "Live sensor reading received" : $sensorStatusLabel)
     : ($rawSensorReading && !$sensorSnapshot["is_valid"] ? "Invalid sensor reading" : "Sensor readings pending");
@@ -170,19 +208,48 @@ include "includes/header.php";
             </div>
         </section>
 
-        <section class="sensor-grid sensor-grid--soil" aria-label="Soil sensor readings" data-live-dashboard>
+        <section
+            class="sensor-grid sensor-grid--soil"
+            aria-label="Soil sensor readings"
+            data-live-dashboard
+            data-initial-moisture="<?php echo htmlspecialchars((string) (dashboard_sensor_value($latestSensorReading, "soil_moisture") ?? "")); ?>"
+            data-initial-ph="<?php echo htmlspecialchars((string) (dashboard_sensor_value($latestSensorReading, "soil_ph") ?? "")); ?>"
+            data-initial-nitrogen="<?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "nitrogen") ?? ""); ?>"
+            data-initial-phosphorus="<?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "phosphorus") ?? ""); ?>"
+            data-initial-potassium="<?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "potassium") ?? ""); ?>">
             <article class="sensor-card npk nutrient-card" data-sensor-card="npk">
                 <div class="sensor-icon">
                     <i class="bi bi-gem"></i>
                 </div>
-                <div>
+                <div class="sensor-card-content">
                     <span>NPK Sensor</span>
-                    <strong data-reading="npk"><?php echo $sensorNpk; ?></strong>
+                    <strong data-reading="npk"><?php echo htmlspecialchars($sensorNpk); ?></strong>
                     <small data-reading-status="npk"><?php echo $latestSensorReading ? "N, P, K mg/kg " . htmlspecialchars($sensorUpdatedText) : "Nitrogen, phosphorus, potassium"; ?></small>
                     <div class="nutrient-values" aria-label="NPK nutrient values">
-                        <span><b>N</b> <output data-reading="nitrogen"><?php echo dashboard_number($latestSensorReading, "nitrogen"); ?></output></span>
-                        <span><b>P</b> <output data-reading="phosphorus"><?php echo dashboard_number($latestSensorReading, "phosphorus"); ?></output></span>
-                        <span><b>K</b> <output data-reading="potassium"><?php echo dashboard_number($latestSensorReading, "potassium"); ?></output></span>
+                        <div class="nutrient-reading">
+                            <b>Nitrogen</b>
+                            <span class="nutrient-measurement">
+                                <output data-reading="nitrogen"><?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "nitrogen") ?? "--"); ?></output>
+                                <small class="sensor-unit">mg/kg</small>
+                            </span>
+                            <span class="status-badge status-unknown" data-status-badge="nitrogen" data-status-label="Nitrogen">NO DATA</span>
+                        </div>
+                        <div class="nutrient-reading">
+                            <b>Phosphorus</b>
+                            <span class="nutrient-measurement">
+                                <output data-reading="phosphorus"><?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "phosphorus") ?? "--"); ?></output>
+                                <small class="sensor-unit">mg/kg</small>
+                            </span>
+                            <span class="status-badge status-unknown" data-status-badge="phosphorus" data-status-label="Phosphorus">NO DATA</span>
+                        </div>
+                        <div class="nutrient-reading">
+                            <b>Potassium</b>
+                            <span class="nutrient-measurement">
+                                <output data-reading="potassium"><?php echo htmlspecialchars(dashboard_raw_sensor_value($latestSensorReading, "potassium") ?? "--"); ?></output>
+                                <small class="sensor-unit">mg/kg</small>
+                            </span>
+                            <span class="status-badge status-unknown" data-status-badge="potassium" data-status-label="Potassium">NO DATA</span>
+                        </div>
                     </div>
                 </div>
                 <span class="sensor-glow"></span>
@@ -192,10 +259,16 @@ include "includes/header.php";
                 <div class="sensor-icon">
                     <i class="bi bi-droplet-half"></i>
                 </div>
-                <div>
+                <div class="sensor-card-content">
                     <span>Soil Moisture</span>
-                    <strong data-reading="soil_moisture"><?php echo dashboard_number($latestSensorReading, "soil_moisture"); ?>%</strong>
-                    <small data-reading-status="soil_moisture"><?php echo htmlspecialchars($sensorUpdatedText); ?></small>
+                    <strong class="sensor-value">
+                        <output data-reading="soil_moisture"><?php echo dashboard_telemetry_number($latestSensorReading, "soil_moisture"); ?></output>
+                        <small class="sensor-unit">%</small>
+                    </strong>
+                    <div class="telemetry-meta">
+                        <small data-reading-status="soil_moisture"><?php echo htmlspecialchars($sensorUpdatedText); ?></small>
+                        <span class="status-badge status-unknown" data-status-badge="soil_moisture" data-status-label="Soil moisture">NO DATA</span>
+                    </div>
                 </div>
                 <span class="sensor-glow"></span>
             </article>
@@ -204,10 +277,13 @@ include "includes/header.php";
                 <div class="sensor-icon">
                     <i class="bi bi-eyedropper"></i>
                 </div>
-                <div>
+                <div class="sensor-card-content">
                     <span>Soil pH</span>
                     <strong data-reading="soil_ph"><?php echo $sensorPh; ?></strong>
-                    <small data-reading-status="soil_ph"><?php echo htmlspecialchars($sensorPhStatus); ?></small>
+                    <div class="telemetry-meta">
+                        <small data-reading-status="soil_ph"><?php echo htmlspecialchars($sensorPhStatus); ?></small>
+                        <span class="status-badge status-unknown" data-status-badge="soil_ph" data-status-label="Soil pH">NO DATA</span>
+                    </div>
                 </div>
                 <span class="sensor-glow"></span>
             </article>
@@ -217,9 +293,9 @@ include "includes/header.php";
                     <i class="bi bi-thermometer-sun"></i>
                 </div>
                 <div>
-                    <span>Temperature</span>
-                    <strong data-reading="temperature"><?php echo dashboard_number($latestSensorReading, "temperature", 1); ?> C</strong>
-                    <small data-reading-status="temperature"><?php echo $latestSensorReading ? htmlspecialchars($sensorUpdatedText) : "Field climate reading"; ?></small>
+                    <span>Soil Temperature</span>
+                    <strong data-reading="temperature"><?php echo dashboard_number($latestSensorReading, "temperature", 1); ?> °C</strong>
+                    <small data-reading-status="temperature"><?php echo $latestSensorReading ? htmlspecialchars($sensorUpdatedText) : "Soil probe reading"; ?></small>
                 </div>
                 <span class="sensor-glow"></span>
             </article>
@@ -241,103 +317,91 @@ include "includes/header.php";
 
 
         <section class="dashboard-content">
-            <article class="recommendation-panel">
+            <article class="recommendation-panel crop-assessment-panel">
                 <div class="section-heading">
                     <div>
-                        <span>AI Recommendation</span>
-                        <h3>Best Crop Match</h3>
+                        <span>Sensor-Based Assessment</span>
+                        <h3>Crop Suitability</h3>
                     </div>
-                    <i class="bi bi-flower2"></i>
+                    <i class="bi bi-clipboard2-pulse"></i>
                 </div>
 
-                <div class="crop-match">
+                <div class="crop-assessment-summary">
                     <div class="match-summary">
-                        <span>Overall Readiness</span>
+                        <span>Top Sensor-Based Score</span>
                         <strong data-recommendation-score>--</strong>
-                        <div class="overall-readiness-track" aria-hidden="true">
-                            <i data-readiness-bar="overall"></i>
-                        </div>
+                        <span class="suitability-badge is-na" data-recommendation-class>Insufficient Data</span>
                     </div>
-                    <div>
-                        <h4 data-recommendation-title>No crop selected yet</h4>
-                        <p>
-                            Once sensor data is available, CropSense can highlight crops
-                            that fit the current soil and climate profile.
+                    <div class="crop-assessment-summary-copy">
+                        <span>Highest sensor-based suitability score</span>
+                        <h4 data-recommendation-title>Waiting for an assessable reading</h4>
+                        <p data-recommendation-description>
+                            Crop-specific results appear when real sensor data and validated thresholds are both available.
                         </p>
                     </div>
                 </div>
 
-                <div class="field-visual field-bar-chart" aria-label="Crop recommendation bar graph">
-                    <div class="bar-chart-item">
-                        <strong data-readiness-bar="moisture">
-                            <span data-readiness-value="moisture">0%</span>
-                        </strong>
-                        <small>Moisture</small>
-                    </div>
-                    <div class="bar-chart-item">
-                        <strong data-readiness-bar="nutrients">
-                            <span data-readiness-value="nutrients">0%</span>
-                        </strong>
-                        <small>Nutrients</small>
-                    </div>
-                    <div class="bar-chart-item">
-                        <strong data-readiness-bar="climate">
-                            <span data-readiness-value="climate">0%</span>
-                        </strong>
-                        <small>Climate</small>
-                    </div>
-                </div>
-
-                <div class="dashboard-crop-heading">
+                <div class="assessment-method-note">
+                    <i class="bi bi-info-circle"></i>
                     <div>
-                        <span>Crop Candidates</span>
-                        <h4>Rice, Corn and Tobacco</h4>
+                        <strong>CropSense score-based suitability classes</strong>
+                        <p>
+                            S1, S2, S3, and N are FAO-inspired labels applied to the CropSense score and limiting-factor rules;
+                            the percentage boundaries are not presented as official FAO thresholds.
+                        </p>
                     </div>
-                    <small>Live pH and temperature comparison</small>
                 </div>
 
-                <div class="dashboard-crop-grid" aria-label="Crop candidate status">
+                <div class="crop-assessment-list" data-crop-assessment-list>
                     <?php foreach ($dashboardCrops as $cropKey => $crop) : ?>
-                        <article
-                            class="dashboard-crop-card is-pending"
-                            data-crop-card="<?php echo htmlspecialchars($cropKey); ?>"
-                            data-ph-min="<?php echo htmlspecialchars((string) ($crop["ph"]["min"] ?? "")); ?>"
-                            data-ph-max="<?php echo htmlspecialchars((string) ($crop["ph"]["max"] ?? "")); ?>"
-                            data-temperature-min="<?php echo htmlspecialchars((string) ($crop["temperature"]["min"] ?? "")); ?>"
-                            data-temperature-max="<?php echo htmlspecialchars((string) ($crop["temperature"]["max"] ?? "")); ?>"
-                            data-ph-tolerance="<?php echo htmlspecialchars((string) ($dashboardCropConfig["near_tolerance"]["soil_ph"] ?? 0.2)); ?>"
-                            data-temperature-tolerance="<?php echo htmlspecialchars((string) ($dashboardCropConfig["near_tolerance"]["temperature"] ?? 2)); ?>">
-                            <div class="dashboard-crop-card-header">
-                                <span class="dashboard-crop-icon">
+                        <details class="crop-assessment-card is-na" data-crop-assessment="<?php echo htmlspecialchars($cropKey); ?>">
+                            <summary>
+                                <span class="crop-assessment-rank" data-crop-rank>--</span>
+                                <span class="crop-assessment-icon">
                                     <i class="bi <?php echo htmlspecialchars($dashboardCropIcons[$cropKey] ?? "bi-flower2"); ?>"></i>
                                 </span>
-                                <span class="dashboard-crop-status" data-crop-status>Awaiting readings</span>
+                                <span class="crop-assessment-name">
+                                    <strong><?php echo htmlspecialchars($crop["name"] ?? ucfirst($cropKey)); ?></strong>
+                                    <small><?php echo htmlspecialchars($crop["scientific_name"] ?? ""); ?></small>
+                                </span>
+                                <strong class="crop-assessment-percentage" data-crop-percentage>--</strong>
+                                <span class="suitability-badge is-na" data-crop-final-badge>Insufficient Data</span>
+                                <i class="bi bi-chevron-down crop-assessment-chevron" aria-hidden="true"></i>
+                            </summary>
+
+                            <div class="crop-assessment-details">
+                                <div class="crop-assessment-metrics">
+                                    <div>
+                                        <span>Score</span>
+                                        <strong data-crop-score>--</strong>
+                                    </div>
+                                    <div>
+                                        <span>Final Class</span>
+                                        <strong data-crop-final-class>Insufficient Data</strong>
+                                    </div>
+                                    <div>
+                                        <span>Parameters Assessed</span>
+                                        <strong data-crop-assessed>0 of 7</strong>
+                                    </div>
+                                    <div class="crop-assessment-metric--limiting">
+                                        <span>Main Limiting Factor</span>
+                                        <strong data-crop-limiting-factor>Not available</strong>
+                                    </div>
+                                </div>
                             </div>
-                            <h5><?php echo htmlspecialchars($crop["name"] ?? ucfirst($cropKey)); ?></h5>
-                            <em><?php echo htmlspecialchars($crop["scientific_name"] ?? ""); ?></em>
-                            <div class="dashboard-crop-ranges">
-                                <span>pH <?php echo htmlspecialchars(cropsense_range_text($crop["ph"] ?? [], 1)); ?></span>
-                                <span><?php echo htmlspecialchars(cropsense_range_text($crop["temperature"] ?? [], 0, "C")); ?></span>
-                            </div>
-                            <p data-crop-note>Waiting for live pH and temperature data.</p>
-                        </article>
+                        </details>
                     <?php endforeach; ?>
                 </div>
 
-                <div class="recommendation-list">
-                    <div>
-                        <i class="bi bi-check2-circle"></i>
-                        Connect soil sensor
-                    </div>
-                    <div>
-                        <i class="bi bi-check2-circle"></i>
-                        Collect field readings
-                    </div>
-                    <div>
-                        <i class="bi bi-check2-circle"></i>
-                        Generate crop match
-                    </div>
-                </div>
+                <aside class="crop-assessment-disclaimer">
+                    <i class="bi bi-shield-check"></i>
+                    <p>
+                        CropSense recommendations are based only on soil parameters measured by the connected sensor.
+                        Final crop selection should also consider factors not measured by the system, including soil texture,
+                        soil depth, drainage, flooding risk, slope, climate, water availability, crop variety, and professional
+                        agronomic assessment.
+                    </p>
+                </aside>
             </article>
 
             <article class="activity-panel">
@@ -403,5 +467,17 @@ include "includes/header.php";
     </main>
 </div>
 
-<script src="/assets/js/dashboard.js?v=20260722-classic-hero-v4"></script>
+<script type="application/json" data-initial-crop-suitability><?php
+    echo json_encode(
+        $dashboardSuitability,
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PRESERVE_ZERO_FRACTION
+    );
+?></script>
+<script type="application/json" data-npk-classification><?php
+    echo json_encode(
+        $dashboardNpkClassification,
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PRESERVE_ZERO_FRACTION
+    );
+?></script>
+<script src="/assets/js/dashboard.js?v=20260827-crop-summary-v2"></script>
 <?php include "includes/footer.php"; ?>

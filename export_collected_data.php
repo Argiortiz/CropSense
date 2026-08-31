@@ -74,7 +74,7 @@ echo "<th>Soil EC (uS/cm)</th>";
 echo "<th>Nitrogen</th>";
 echo "<th>Phosphorus</th>";
 echo "<th>Potassium</th>";
-echo "<th>Temperature (C)</th>";
+echo "<th>Soil Temperature (°C)</th>";
 echo "</tr></thead><tbody>";
 
 if ($result) {

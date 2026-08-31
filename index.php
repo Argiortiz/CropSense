@@ -166,7 +166,7 @@ $currentYear = date("Y");
                                 </div>
                                 <ul>
                                     <li>Soil Moisture</li>
-                                    <li>Temperature</li>
+                                    <li>Soil Temperature</li>
                                     <li>EC</li>
                                     <li>pH</li>
                                     <li>Nitrogen</li>
@@ -185,7 +185,7 @@ $currentYear = date("Y");
                 <div class="proof-grid">
                     <div>
                         <strong>7</strong>
-                        <span>Soil and climate parameters</span>
+                        <span>Measured soil parameters</span>
                     </div>
                     <div>
                         <strong>7</strong>
@@ -222,7 +222,7 @@ $currentYear = date("Y");
                         <h3>Smart Soil Monitoring</h3>
                         <p>
                             An RS485 multi-parameter soil sensor connects through a MAX3485
-                            transceiver to an ESP32, collecting moisture, temperature, EC, pH,
+                            transceiver to an ESP32, collecting moisture, soil temperature, EC, pH,
                             nitrogen, phosphorus, and potassium.
                         </p>
                     </article>
@@ -276,7 +276,7 @@ $currentYear = date("Y");
                         </p>
                         <ul class="feature-parameters" aria-label="Monitored parameters">
                             <li>Soil Moisture</li>
-                            <li>Temperature</li>
+                            <li>Soil Temperature</li>
                             <li>EC</li>
                             <li>pH</li>
                             <li>Nitrogen</li>
@@ -350,7 +350,7 @@ $currentYear = date("Y");
                         <span class="workflow-step-number">01</span>
                         <div class="workflow-icon"><i class="bi bi-moisture" aria-hidden="true"></i></div>
                         <h3>Soil Sensor</h3>
-                        <p>Collects seven soil and climate parameters from the field.</p>
+                        <p>Collects seven measured soil parameters from the field.</p>
                     </li>
                     <li>
                         <span class="workflow-step-number">02</span>
