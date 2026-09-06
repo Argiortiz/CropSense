@@ -195,7 +195,7 @@ include "includes/header.php";
 
             <div class="hero-orbit classic-hero-orbit" aria-label="CropSense field overview">
                 <div class="orbit-ring classic-orbit-ring">
-                    <img src="/assets/img/cropsense-logo.svg" alt="CropSense">
+                    <img src="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>" alt="CropSense">
                 </div>
 
                 <div class="hero-weather classic-field-mood">
@@ -447,18 +447,18 @@ include "includes/header.php";
                 </div>
 
                 <?php if (cropsense_is_admin()) : ?>
-                    <a href="user_management.php">
+                    <a href="<?php echo htmlspecialchars(cropsense_url('user_management.php'), ENT_QUOTES, 'UTF-8'); ?>">
                         <i class="bi bi-person-plus"></i>
                         Insert User
                     </a>
                 <?php endif; ?>
 
-                <a href="collected_data.php">
+                <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php'), ENT_QUOTES, 'UTF-8'); ?>">
                     <i class="bi bi-table"></i>
                     View Collected Data
                 </a>
 
-                <a href="export_collected_data.php">
+                <a href="<?php echo htmlspecialchars(cropsense_url('export_collected_data.php'), ENT_QUOTES, 'UTF-8'); ?>">
                     <i class="bi bi-file-earmark-excel"></i>
                     Download Data
                 </a>
@@ -479,5 +479,5 @@ include "includes/header.php";
         JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_PRESERVE_ZERO_FRACTION
     );
 ?></script>
-<script src="/assets/js/dashboard.js?v=20260827-crop-summary-v2"></script>
+<script src="<?php echo htmlspecialchars(cropsense_asset('js/dashboard.js'), ENT_QUOTES, 'UTF-8'); ?>?v=20260827-crop-summary-v2"></script>
 <?php include "includes/footer.php"; ?>

@@ -2,6 +2,7 @@
 
 require_once "includes/security.php";
 require_once "config/database.php";
+require_once "config/app_url.php";
 
 cropsense_start_secure_session();
 
@@ -11,7 +12,7 @@ if (isset($_SESSION['user_id'])) {
 
 session_destroy();
 
-header("Location: login.php");
+header('Location: ' . cropsense_url('login.php'));
 
 exit();
 

@@ -1,34 +1,83 @@
 <?php
-require_once "includes/security.php";
+
+require_once __DIR__ . '/includes/security.php';
+require_once __DIR__ . '/config/app_url.php';
 
 cropsense_start_secure_session();
-cropsense_apply_security_headers("web");
+cropsense_apply_security_headers('web');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>CropSense | Login</title>
 
-    <meta name="theme-color" content="#123d2f">
+    <meta
+        name="theme-color"
+        content="#123d2f"
+    >
 
-    <!-- Favicon -->
-    <link rel="icon" href="/assets/img/cropsense-logo.svg" type="image/svg+xml">
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- =====================================================
+         CROPSENSE ICON
+    ====================================================== -->
 
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link
+        rel="icon"
+        href="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>"
+        type="image/svg+xml"
+    >
 
-    <!-- Login CSS -->
-    <link rel="stylesheet" href="/assets/css/login.css?v=20260716-command2">
-    <link rel="stylesheet" href="/assets/css/design-system.css?v=20260817-ui-refresh">
+
+    <!-- =====================================================
+         BOOTSTRAP
+    ====================================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         BOOTSTRAP ICONS
+    ====================================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         CROPSENSE LOGIN CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(cropsense_asset('css/login.css'), ENT_QUOTES, 'UTF-8') ?>?v=20260901"
+    >
+
+
+    <!-- =====================================================
+         CROPSENSE DESIGN SYSTEM
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(cropsense_asset('css/design-system.css'), ENT_QUOTES, 'UTF-8') ?>?v=20260901"
+    >
+
 </head>
-
 <body>
 <main class="login-page">
     <div class="ambient-grid" aria-hidden="true"></div>
@@ -46,7 +95,7 @@ cropsense_apply_security_headers("web");
         <section class="brand-area" aria-label="CropSense introduction">
             <div class="brand-lockup">
                 <div class="brand-logo" aria-hidden="true">
-                    <img src="/assets/img/cropsense-logo.svg" alt="">
+                    <img src="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
                 </div>
 
                 <div>
@@ -100,7 +149,7 @@ cropsense_apply_security_headers("web");
 
             <div class="login-card">
                 <div class="card-icon">
-                    <img src="/assets/img/cropsense-logo.svg" alt="">
+                    <img src="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
                 </div>
 
                 <div class="card-heading">
@@ -118,7 +167,7 @@ cropsense_apply_security_headers("web");
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="includes/auth.php" id="loginForm">
+                <form method="POST" action="<?= htmlspecialchars(cropsense_url('includes/auth.php'), ENT_QUOTES, 'UTF-8') ?>" id="loginForm">
                     <div class="form-field">
                         <label class="form-label" for="username" data-i18n="username">Username or Email</label>
 
@@ -208,9 +257,8 @@ cropsense_apply_security_headers("web");
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/script.js?v=20260716-command2"></script>
+<script src="<?= htmlspecialchars(cropsense_asset('js/script.js'), ENT_QUOTES, 'UTF-8') ?>?v=20260716-command2"></script>
 </body>
 
 </html>
-
 

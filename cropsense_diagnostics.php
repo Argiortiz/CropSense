@@ -30,6 +30,7 @@ $requiredFiles = array(
     'dashboard.php',
     'config/database.php',
     'config/crop_thresholds.php',
+    'database/20260826_crop_parameter_thresholds.sql',
     'config/database.local.php',
 );
 

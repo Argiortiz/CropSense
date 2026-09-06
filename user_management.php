@@ -240,7 +240,7 @@ include "includes/header.php";
                     <div class="form-alert error"><?php echo htmlspecialchars($formError); ?></div>
                 <?php endif; ?>
 
-                <form class="management-form" method="post" action="user_management.php?section=access-control">
+                <form class="management-form" method="post" action="<?php echo htmlspecialchars(cropsense_url('user_management.php?section=access-control'), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                     <input type="hidden" name="action" value="create_user">
                     <input type="hidden" name="management_section" value="access-control">
@@ -350,7 +350,7 @@ include "includes/header.php";
                                             </summary>
 
                                             <div>
-                                                <form class="inline-user-form" method="post" action="user_management.php?section=accounts">
+                                                <form class="inline-user-form" method="post" action="<?php echo htmlspecialchars(cropsense_url('user_management.php?section=accounts'), ENT_QUOTES, 'UTF-8'); ?>">
                                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                                                     <input type="hidden" name="action" value="update_user">
                                                     <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
@@ -403,7 +403,7 @@ include "includes/header.php";
                                                     </button>
                                                 </form>
 
-                                                <form class="remove-user-form" method="post" action="user_management.php?section=accounts">
+                                                <form class="remove-user-form" method="post" action="<?php echo htmlspecialchars(cropsense_url('user_management.php?section=accounts'), ENT_QUOTES, 'UTF-8'); ?>">
                                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                                                     <input type="hidden" name="action" value="delete_user">
                                                     <input type="hidden" name="user_id" value="<?php echo $userId; ?>">

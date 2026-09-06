@@ -1,12 +1,13 @@
 <?php
 
 require_once __DIR__ . '/includes/security.php';
+require_once __DIR__ . '/config/app_url.php';
 
 cropsense_start_secure_session();
 cropsense_apply_security_headers("web");
 
 if (empty($_SESSION['pending_2fa_user_id'])) {
-    header("Location: login.php");
+    header('Location: ' . cropsense_url('login.php'));
     exit();
 }
 
@@ -49,13 +50,13 @@ $maskedEmail = maskEmail($email);
 
     <link
         rel="icon"
-        href="assets/img/cropsense-logo.svg"
+        href="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>"
         type="image/svg+xml"
     >
 
     <link
         rel="stylesheet"
-        href="assets/css/bootstrap.min.css"
+        href="<?php echo htmlspecialchars(cropsense_asset('css/bootstrap.min.css'), ENT_QUOTES, 'UTF-8'); ?>"
     >
 
     <link
@@ -223,7 +224,7 @@ $maskedEmail = maskEmail($email);
 
     <div class="otp-logo">
         <img
-            src="assets/img/cropsense-logo.svg"
+            src="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>"
             alt="CropSense"
         >
     </div>
@@ -277,7 +278,7 @@ $maskedEmail = maskEmail($email);
 
     <form
         method="POST"
-        action="includes/verify_otp.php"
+        action="<?php echo htmlspecialchars(cropsense_url('includes/verify_otp.php'), ENT_QUOTES, 'UTF-8'); ?>"
     >
 
         <input

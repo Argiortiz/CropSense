@@ -87,7 +87,7 @@ include "includes/header.php";
                 <p>Monitor pH, EC, NPK, soil temperature, and moisture records from connected field devices.</p>
             </div>
 
-            <a class="download-action" href="export_collected_data.php?range=<?php echo urlencode($selectedRange); ?>">
+            <a class="download-action" href="<?php echo htmlspecialchars(cropsense_url('export_collected_data.php?range=' . urlencode($selectedRange)), ENT_QUOTES, 'UTF-8'); ?>">
                 <i class="bi bi-file-earmark-excel"></i>
                 Download Data
             </a>
@@ -95,14 +95,14 @@ include "includes/header.php";
 
         <section class="management-panel full">
             <nav class="data-filter-tabs" aria-label="Collected data categories">
-                <a href="collected_data.php?range=hour" class="<?php echo $selectedRange === "hour" ? "active" : ""; ?>">Last hour</a>
-                <a href="collected_data.php?range=day" class="<?php echo $selectedRange === "day" ? "active" : ""; ?>">Last 24 hours</a>
-                <a href="collected_data.php?range=week" class="<?php echo $selectedRange === "week" ? "active" : ""; ?>">Last 7 days</a>
+                <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php?range=hour'), ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $selectedRange === "hour" ? "active" : ""; ?>">Last hour</a>
+                <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php?range=day'), ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $selectedRange === "day" ? "active" : ""; ?>">Last 24 hours</a>
+                <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php?range=week'), ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $selectedRange === "week" ? "active" : ""; ?>">Last 7 days</a>
                 <details class="data-filter-more">
                     <summary>More</summary>
                     <div>
-                        <a href="collected_data.php?range=month" class="<?php echo $selectedRange === "month" ? "active" : ""; ?>">Last 4 weeks</a>
-                        <a href="collected_data.php?range=all" class="<?php echo $selectedRange === "all" ? "active" : ""; ?>">All time</a>
+                        <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php?range=month'), ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $selectedRange === "month" ? "active" : ""; ?>">Last 4 weeks</a>
+                        <a href="<?php echo htmlspecialchars(cropsense_url('collected_data.php?range=all'), ENT_QUOTES, 'UTF-8'); ?>" class="<?php echo $selectedRange === "all" ? "active" : ""; ?>">All time</a>
                     </div>
                 </details>
             </nav>
