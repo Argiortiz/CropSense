@@ -346,8 +346,9 @@ include "includes/header.php";
                     <div>
                         <strong>CropSense score-based suitability classes</strong>
                         <p>
-                            S1, S2, S3, and N are FAO-inspired labels applied to the CropSense score and limiting-factor rules;
-                            the percentage boundaries are not presented as official FAO thresholds.
+                            Recommended range = 2 points; near range = 1; outside = 0. Seven parameters give a maximum of 14.
+                            Missing values are excluded from the maximum. Highly Suitable: 85-100%; Suitable: 70-84.99%;
+                            Marginally Suitable: 50-69.99%; Not Suitable: below 50%.
                         </p>
                     </div>
                 </div>
@@ -370,6 +371,9 @@ include "includes/header.php";
                             </summary>
 
                             <div class="crop-assessment-details">
+                                <p data-crop-recommended></p>
+                                <p data-crop-match></p>
+                                <p data-crop-missing>NO DATA</p>
                                 <div class="crop-assessment-metrics">
                                     <div>
                                         <span>Score</span>
