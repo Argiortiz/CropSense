@@ -1,0 +1,961 @@
+<?php
+
+require_once __DIR__ . "/includes/session.php";
+require_once __DIR__ . "/includes/roles.php";
+require_once __DIR__ . "/includes/device_status.php";
+require_once __DIR__ . "/config/database.php";
+require_once __DIR__ . "/includes/latest_sensor.php";
+require_once __DIR__ . "/includes/crop_suitability.php";
+
+date_default_timezone_set("Asia/Manila");
+
+/* =========================================================
+   SENSOR DATA
+========================================================= */
+
+$sensorSnapshot = cropsense_latest_sensor_reading($conn);
+
+$latestSensorReading =
+    !empty($sensorSnapshot["is_valid"])
+        ? ($sensorSnapshot["reading"] ?? null)
+        : null;
+
+$sensorAgeSeconds = $sensorSnapshot["age_seconds"] ?? null;
+$sensorStatusLabel = $sensorSnapshot["device_status"] ?? "Offline";
+$sensorIsLive = ($sensorSnapshot["device_state"] ?? "") === "online";
+
+/* =========================================================
+   CROPS
+========================================================= */
+
+$cropConfig = cropsense_crop_config();
+
+$dashboardCrops = array_intersect_key(
+    $cropConfig["crops"] ?? [],
+    array_flip(["rice", "corn", "tobacco"])
+);
+
+$dashboardNpkClassification =
+    $cropConfig["npk_classification"] ?? [];
+
+$dashboardSuitability =
+    cropsense_assess_crop_suitability(
+        $conn,
+        $latestSensorReading
+    );
+
+$cropIcons = [
+    "rice" => "bi-droplet-half",
+    "corn" => "bi-flower1",
+    "tobacco" => "bi-wind"
+];
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function dashboard_value($reading, $key)
+{
+    if (
+        !is_array($reading) ||
+        !array_key_exists($key, $reading) ||
+        $reading[$key] === null ||
+        $reading[$key] === "" ||
+        !is_numeric($reading[$key])
+    ) {
+        return null;
+    }
+
+    return (float) $reading[$key];
+}
+
+function dashboard_display($reading, $key, $decimals = 1)
+{
+    $value = dashboard_value($reading, $key);
+
+    if ($value === null) {
+        return "--";
+    }
+
+    return number_format(
+        $value,
+        $decimals,
+        ".",
+        ""
+    );
+}
+
+function dashboard_raw($reading, $key)
+{
+    if (
+        !is_array($reading) ||
+        !array_key_exists($key, $reading) ||
+        $reading[$key] === null ||
+        $reading[$key] === ""
+    ) {
+        return "--";
+    }
+
+    return (string) $reading[$key];
+}
+
+function dashboard_age($seconds)
+{
+    if ($seconds === null) {
+        return "No recent reading";
+    }
+
+    $seconds = max(0, (int) $seconds);
+
+    if ($seconds < 60) {
+        return "just now";
+    }
+
+    if ($seconds < 3600) {
+        return floor($seconds / 60) . " min ago";
+    }
+
+    return floor($seconds / 3600) . " hr ago";
+}
+
+/* =========================================================
+   VALUES
+========================================================= */
+
+$moisture = dashboard_display(
+    $latestSensorReading,
+    "soil_moisture",
+    1
+);
+
+$soilPh = dashboard_display(
+    $latestSensorReading,
+    "soil_ph",
+    1
+);
+
+$soilTemperature = dashboard_display(
+    $latestSensorReading,
+    "temperature",
+    1
+);
+
+$soilEc = dashboard_display(
+    $latestSensorReading,
+    "soil_ec",
+    0
+);
+
+$nitrogen = dashboard_raw(
+    $latestSensorReading,
+    "nitrogen"
+);
+
+$phosphorus = dashboard_raw(
+    $latestSensorReading,
+    "phosphorus"
+);
+
+$potassium = dashboard_raw(
+    $latestSensorReading,
+    "potassium"
+);
+
+$readingTime = dashboard_age(
+    $sensorAgeSeconds
+);
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+$hour = (int) date("G");
+
+$greeting =
+    $hour < 12
+        ? "Good morning"
+        : (
+            $hour < 18
+                ? "Good afternoon"
+                : "Good evening"
+        );
+
+$pageTitle = "Live Monitoring";
+$bodyExtraClass = "dashboard-hero-enhanced";
+
+include __DIR__ . "/includes/header.php";
+
+?>
+
+<div class="dashboard-shell">
+
+    <?php
+    include __DIR__ . "/includes/sidebar.php";
+    ?>
+
+    <main class="dashboard-main">
+
+        <?php
+        include __DIR__ . "/includes/navbar.php";
+        ?>
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="dashboard-hero field-command-hero classic-command-hero">
+
+            <div class="hero-copy">
+
+                <div class="hero-eyebrow-row">
+                    <span class="hero-badge">
+                        <i class="bi bi-stars"></i>
+                        Live Monitoring
+                    </span>
+                </div>
+
+                <h2>
+                    <?php
+                    echo htmlspecialchars($greeting);
+                    ?>,
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION["fullname"] ??
+                        "Administrator"
+                    );
+                    ?>!
+                </h2>
+
+                <p class="hero-lead">
+                    Your farm conditions,
+                    beautifully in focus.
+                </p>
+
+                <p class="hero-description">
+                    Monitor soil conditions,
+                    nutrients and crop suitability
+                    from your CropSense dashboard.
+                </p>
+
+                <div class="hero-status-strip">
+
+                    <span>
+                        <i class="bi bi-calendar3"></i>
+                        <?php echo date("F j, Y"); ?>
+                    </span>
+
+                    <span>
+                        <i class="bi bi-clock"></i>
+                        <?php echo date("g:i A"); ?>
+                    </span>
+
+                    <span
+                        class="hero-live-state
+                        <?php
+                        echo $sensorIsLive
+                            ? "is-live"
+                            : "is-offline";
+                        ?>"
+                    >
+                        <i></i>
+
+                        <b>
+                            <?php
+                            echo htmlspecialchars(
+                                $sensorStatusLabel
+                            );
+                            ?>
+                        </b>
+                    </span>
+
+                </div>
+
+                <div class="hero-metrics">
+
+                    <div>
+                        <strong>7</strong>
+                        <span>Soil Parameters</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            <?php
+                            echo $sensorIsLive
+                                ? "1"
+                                : "0";
+                            ?>
+                        </strong>
+                        <span>Device Online</span>
+                    </div>
+
+                    <div>
+                        <strong>2.0</strong>
+                        <span>CropSense Version</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SENSOR VALUES
+        ================================================== -->
+
+        <section
+            class="sensor-grid sensor-grid--soil"
+            data-live-dashboard
+            aria-label="Live soil sensor readings"
+        >
+
+            <!-- NPK -->
+
+            <article
+                class="sensor-card npk nutrient-card"
+            >
+
+                <div class="sensor-icon">
+                    <i class="bi bi-gem"></i>
+                </div>
+
+                <div class="sensor-card-content">
+
+                    <span>NPK Sensor</span>
+
+                    <strong data-reading="npk">
+                        <?php
+                        echo htmlspecialchars(
+                            $nitrogen .
+                            " / " .
+                            $phosphorus .
+                            " / " .
+                            $potassium
+                        );
+                        ?>
+                    </strong>
+
+                    <small>
+                        N / P / K mg/kg —
+                        <?php
+                        echo htmlspecialchars(
+                            $readingTime
+                        );
+                        ?>
+                    </small>
+
+                    <div class="nutrient-values">
+
+                        <div class="nutrient-reading">
+                            <b>Nitrogen</b>
+
+                            <span class="nutrient-measurement">
+                                <output
+                                    data-reading="nitrogen"
+                                >
+                                    <?php
+                                    echo htmlspecialchars(
+                                        $nitrogen
+                                    );
+                                    ?>
+                                </output>
+
+                                <small>
+                                    mg/kg
+                                </small>
+                            </span>
+                        </div>
+
+                        <div class="nutrient-reading">
+                            <b>Phosphorus</b>
+
+                            <span class="nutrient-measurement">
+                                <output
+                                    data-reading="phosphorus"
+                                >
+                                    <?php
+                                    echo htmlspecialchars(
+                                        $phosphorus
+                                    );
+                                    ?>
+                                </output>
+
+                                <small>
+                                    mg/kg
+                                </small>
+                            </span>
+                        </div>
+
+                        <div class="nutrient-reading">
+                            <b>Potassium</b>
+
+                            <span class="nutrient-measurement">
+                                <output
+                                    data-reading="potassium"
+                                >
+                                    <?php
+                                    echo htmlspecialchars(
+                                        $potassium
+                                    );
+                                    ?>
+                                </output>
+
+                                <small>
+                                    mg/kg
+                                </small>
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- MOISTURE -->
+
+            <article class="sensor-card moisture">
+
+                <div class="sensor-icon">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+
+                <div>
+
+                    <span>Soil Moisture</span>
+
+                    <strong>
+                        <output
+                            data-reading="soil_moisture"
+                        >
+                            <?php
+                            echo htmlspecialchars(
+                                $moisture
+                            );
+                            ?>
+                        </output>
+                        %
+                    </strong>
+
+                    <small>
+                        <?php
+                        echo htmlspecialchars(
+                            $readingTime
+                        );
+                        ?>
+                    </small>
+
+                </div>
+
+            </article>
+
+
+            <!-- PH -->
+
+            <article class="sensor-card ph">
+
+                <div class="sensor-icon">
+                    <i class="bi bi-eyedropper"></i>
+                </div>
+
+                <div>
+
+                    <span>Soil pH</span>
+
+                    <strong
+                        data-reading="soil_ph"
+                    >
+                        <?php
+                        echo htmlspecialchars(
+                            $soilPh
+                        );
+                        ?>
+                    </strong>
+
+                    <small>
+                        <?php
+                        echo htmlspecialchars(
+                            $readingTime
+                        );
+                        ?>
+                    </small>
+
+                </div>
+
+            </article>
+
+
+            <!-- TEMPERATURE -->
+
+            <article class="sensor-card temperature">
+
+                <div class="sensor-icon">
+                    <i class="bi bi-thermometer-sun"></i>
+                </div>
+
+                <div>
+
+                    <span>Soil Temperature</span>
+
+                    <strong
+                        data-reading="temperature"
+                    >
+                        <?php
+                        echo htmlspecialchars(
+                            $soilTemperature
+                        );
+                        ?>
+                        °C
+                    </strong>
+
+                    <small>
+                        <?php
+                        echo htmlspecialchars(
+                            $readingTime
+                        );
+                        ?>
+                    </small>
+
+                </div>
+
+            </article>
+
+
+            <!-- EC -->
+
+            <article class="sensor-card ec">
+
+                <div class="sensor-icon">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+
+                <div>
+
+                    <span>Soil EC</span>
+
+                    <strong
+                        data-reading="soil_ec"
+                    >
+                        <?php
+                        echo htmlspecialchars(
+                            $soilEc
+                        );
+                        ?>
+                    </strong>
+
+                    <small>
+                        µS/cm —
+                        <?php
+                        echo htmlspecialchars(
+                            $readingTime
+                        );
+                        ?>
+                    </small>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             CROP SUITABILITY
+        ================================================== -->
+
+        <section class="dashboard-content">
+
+            <article
+                class="recommendation-panel crop-assessment-panel"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span>
+                            Sensor-Based Assessment
+                        </span>
+
+                        <h3>
+                            Crop Suitability
+                        </h3>
+                    </div>
+
+                    <i
+                        class="bi bi-clipboard2-pulse"
+                    ></i>
+
+                </div>
+
+
+                <div class="crop-assessment-summary">
+
+                    <div class="match-summary">
+
+                        <span>
+                            Top Sensor-Based Score
+                        </span>
+
+                        <strong
+                            data-recommendation-score
+                        >
+                            --
+                        </strong>
+
+                        <span
+                            class="suitability-badge is-na"
+                            data-recommendation-class
+                        >
+                            Insufficient Data
+                        </span>
+
+                    </div>
+
+
+                    <div class="crop-assessment-summary-copy">
+
+                        <span>
+                            Highest suitability score
+                        </span>
+
+                        <h4
+                            data-recommendation-title
+                        >
+                            Waiting for assessment
+                        </h4>
+
+                        <p
+                            data-recommendation-description
+                        >
+                            CropSense compares all seven
+                            measured soil parameters
+                            against the recommended ranges.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="assessment-method-note">
+
+                    <i class="bi bi-info-circle"></i>
+
+                    <div>
+
+                        <strong>
+                            CropSense scoring
+                        </strong>
+
+                        <p>
+                            Recommended range = 2 points,
+                            near range = 1 point,
+                            outside range = 0 points.
+                            Maximum score is 14.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="crop-assessment-list"
+                    data-crop-assessment-list
+                >
+
+                    <?php
+                    foreach (
+                        $dashboardCrops
+                        as $cropKey => $crop
+                    ) :
+                    ?>
+
+                        <details
+                            class="crop-assessment-card is-na"
+                            data-crop-assessment="<?php
+                            echo htmlspecialchars(
+                                $cropKey
+                            );
+                            ?>"
+                            open
+                        >
+
+                            <summary>
+
+                                <span
+                                    class="crop-assessment-rank"
+                                    data-crop-rank
+                                >
+                                    --
+                                </span>
+
+                                <span
+                                    class="crop-assessment-icon"
+                                >
+
+                                    <i
+                                        class="bi <?php
+                                        echo htmlspecialchars(
+                                            $cropIcons[$cropKey]
+                                            ?? "bi-flower2"
+                                        );
+                                        ?>"
+                                    ></i>
+
+                                </span>
+
+
+                                <span
+                                    class="crop-assessment-name"
+                                >
+
+                                    <strong>
+                                        <?php
+                                        echo htmlspecialchars(
+                                            $crop["name"]
+                                            ?? ucfirst(
+                                                $cropKey
+                                            )
+                                        );
+                                        ?>
+                                    </strong>
+
+                                    <small>
+                                        <?php
+                                        echo htmlspecialchars(
+                                            $crop[
+                                                "scientific_name"
+                                            ] ?? ""
+                                        );
+                                        ?>
+                                    </small>
+
+                                </span>
+
+
+                                <strong
+                                    class="crop-assessment-percentage"
+                                    data-crop-percentage
+                                >
+                                    --
+                                </strong>
+
+
+                                <span
+                                    class="suitability-badge is-na"
+                                    data-crop-final-badge
+                                >
+                                    Insufficient Data
+                                </span>
+
+                            </summary>
+
+
+                            <div
+                                class="crop-assessment-details"
+                            >
+
+                                <p
+                                    data-crop-recommended
+                                ></p>
+
+                                <p
+                                    data-crop-match
+                                ></p>
+
+                                <p
+                                    data-crop-missing
+                                ></p>
+
+
+                                <div
+                                    class="crop-assessment-metrics"
+                                >
+
+                                    <div>
+                                        <span>
+                                            Score
+                                        </span>
+
+                                        <strong
+                                            data-crop-score
+                                        >
+                                            --
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>
+                                            Final Class
+                                        </span>
+
+                                        <strong
+                                            data-crop-final-class
+                                        >
+                                            Insufficient Data
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>
+                                            Parameters Assessed
+                                        </span>
+
+                                        <strong
+                                            data-crop-assessed
+                                        >
+                                            0 of 7
+                                        </strong>
+                                    </div>
+
+
+                                    <div
+                                        class="crop-assessment-metric--limiting"
+                                    >
+
+                                        <span>
+                                            Main Limiting Factor
+                                        </span>
+
+                                        <strong
+                                            data-crop-limiting-factor
+                                        >
+                                            Not available
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </details>
+
+                    <?php
+                    endforeach;
+                    ?>
+
+                </div>
+
+            </article>
+
+
+            <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
+
+            <article class="quick-actions">
+
+                <div class="section-heading">
+                    <div>
+                        <span>Tools</span>
+                        <h3>Quick Actions</h3>
+                    </div>
+                </div>
+
+
+                <a
+                    href="<?php
+                    echo htmlspecialchars(
+                        cropsense_url(
+                            "collected_data.php"
+                        )
+                    );
+                    ?>"
+                >
+                    <i class="bi bi-table"></i>
+                    View Collected Data
+                </a>
+
+
+                <a
+                    href="<?php
+                    echo htmlspecialchars(
+                        cropsense_url(
+                            "export_collected_data.php"
+                        )
+                    );
+                    ?>"
+                >
+                    <i
+                        class="bi bi-file-earmark-excel"
+                    ></i>
+                    Download Data
+                </a>
+
+            </article>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     INITIAL CROP DATA FOR JAVASCRIPT
+===================================================== -->
+
+<script
+    type="application/json"
+    data-initial-crop-suitability
+>
+<?php
+
+echo json_encode(
+    $dashboardSuitability,
+    JSON_UNESCAPED_SLASHES |
+    JSON_UNESCAPED_UNICODE |
+    JSON_HEX_TAG |
+    JSON_HEX_AMP |
+    JSON_HEX_APOS |
+    JSON_HEX_QUOT |
+    JSON_PRESERVE_ZERO_FRACTION
+);
+
+?>
+</script>
+
+
+<script
+    type="application/json"
+    data-npk-classification
+>
+<?php
+
+echo json_encode(
+    $dashboardNpkClassification,
+    JSON_UNESCAPED_SLASHES |
+    JSON_UNESCAPED_UNICODE |
+    JSON_HEX_TAG |
+    JSON_HEX_AMP |
+    JSON_HEX_APOS |
+    JSON_HEX_QUOT |
+    JSON_PRESERVE_ZERO_FRACTION
+);
+
+?>
+</script>
+
+
+<script
+    src="<?php
+    echo htmlspecialchars(
+        cropsense_asset(
+            "js/dashboard.js"
+        )
+    );
+    ?>?v=20260906"
+></script>
+
+
+<?php
+
+include __DIR__ . "/includes/footer.php";
+
+?>

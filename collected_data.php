@@ -1,42 +1,27 @@
 <?php
 require_once "includes/session.php";
 require_once "config/database.php";
+require_once "includes/storage_crypto.php";
 
 $pageTitle = "Collected Data";
 $pageKicker = ($_SESSION["role"] ?? "") === "Administrator" ? "Administrator Dashboard" : "MAO Staff Dashboard";
 $hideSensorIndicator = true;
 
 $rangeOptions = [
-    "hour" => [
-        "label" => "Last hour",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)",
-    ],
-    "day" => [
-        "label" => "Last 24 hours",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)",
-    ],
-    "week" => [
-        "label" => "Last 7 days",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)",
-    ],
-    "month" => [
-        "label" => "Last 4 weeks",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)",
-    ],
-    "all" => [
-        "label" => "All time",
-        "condition" => "1 = 1",
-    ],
+    "hour" => ["label" => "Last hour", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)"],
+    "day" => ["label" => "Last 24 hours", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)"],
+    "week" => ["label" => "Last 7 days", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"],
+    "month" => ["label" => "Last 4 weeks", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)"],
+    "all" => ["label" => "All time", "condition" => "1 = 1"],
 ];
-$selectedRange = $_GET["range"] ?? "all";
 
-if (!isset($rangeOptions[$selectedRange])) {
-    $selectedRange = "all";
-}
+$selectedRange = $_GET["range"] ?? "all";
+if (!isset($rangeOptions[$selectedRange])) $selectedRange = "all";
 
 $selectedRangeLabel = $rangeOptions[$selectedRange]["label"];
 $rangeCondition = $rangeOptions[$selectedRange]["condition"];
 $readings = [];
+
 $readingSql = "
     SELECT
         sr.id,
@@ -47,6 +32,11 @@ $readingSql = "
         sr.phosphorus,
         sr.potassium,
         sr.temperature,
+        sr.humidity,
+        sr.encrypted_payload,
+        sr.encryption_iv,
+        sr.encryption_tag,
+        sr.encryption_version,
         sr.created_at,
         d.device_name,
         d.device_code,
@@ -64,7 +54,11 @@ $readingResult = $conn->query($readingSql);
 
 if ($readingResult) {
     while ($row = $readingResult->fetch_assoc()) {
-        $readings[] = $row;
+        try {
+            $readings[] = cropsense_decrypt_sensor_from_database($row);
+        } catch (Throwable $error) {
+            error_log("Collected data AES decrypt failed for reading " . $row["id"] . ": " . $error->getMessage());
+        }
     }
 }
 
@@ -84,7 +78,7 @@ include "includes/header.php";
                     Field Collection Records
                 </span>
                 <h2>Review collected soil sensor data.</h2>
-                <p>Monitor pH, EC, NPK, soil temperature, and moisture records from connected field devices.</p>
+                <p>Sensor measurements are AES-256-GCM encrypted at rest and decrypted by the application for authorized display.</p>
             </div>
 
             <a class="download-action" href="<?php echo htmlspecialchars(cropsense_url('export_collected_data.php?range=' . urlencode($selectedRange)), ENT_QUOTES, 'UTF-8'); ?>">
@@ -112,7 +106,7 @@ include "includes/header.php";
                     <span>Sensor Logs</span>
                     <h3><?php echo htmlspecialchars($selectedRangeLabel); ?></h3>
                 </div>
-                <i class="bi bi-table"></i>
+                <i class="bi bi-shield-lock"></i>
             </div>
 
             <div class="data-table-wrap">
@@ -143,9 +137,9 @@ include "includes/header.php";
                                     <?php echo htmlspecialchars($reading["device_name"]); ?>
                                     <small><?php echo htmlspecialchars($reading["device_code"]); ?></small>
                                 </td>
-                                <td><?php echo number_format((float) $reading["soil_moisture"], 0); ?>%</td>
-                                <td><?php echo (float) $reading["soil_ph"] > 0 ? number_format((float) $reading["soil_ph"], 1) : "--"; ?></td>
-                                <td><?php echo (float) $reading["soil_ec"] > 0 ? number_format((float) $reading["soil_ec"], 0) : "--"; ?></td>
+                                <td><?php echo number_format((float) $reading["soil_moisture"], 1); ?>%</td>
+                                <td><?php echo number_format((float) $reading["soil_ph"], 1); ?></td>
+                                <td><?php echo number_format((float) $reading["soil_ec"], 0); ?></td>
                                 <td><?php echo number_format((float) $reading["nitrogen"], 0); ?></td>
                                 <td><?php echo number_format((float) $reading["phosphorus"], 0); ?></td>
                                 <td><?php echo number_format((float) $reading["potassium"], 0); ?></td>

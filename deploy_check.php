@@ -1,0 +1,3 @@
+<?php
+echo "CROPSENSE_DEPLOY_CHECK_2026";
+?>

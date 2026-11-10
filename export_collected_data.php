@@ -1,34 +1,18 @@
 <?php
 require_once "includes/session.php";
 require_once "config/database.php";
+require_once "includes/storage_crypto.php";
 
 $rangeOptions = [
-    "hour" => [
-        "label" => "last-hour",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)",
-    ],
-    "day" => [
-        "label" => "last-24-hours",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)",
-    ],
-    "week" => [
-        "label" => "last-7-days",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)",
-    ],
-    "month" => [
-        "label" => "last-4-weeks",
-        "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)",
-    ],
-    "all" => [
-        "label" => "all-time",
-        "condition" => "1 = 1",
-    ],
+    "hour" => ["label" => "last-hour", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)"],
+    "day" => ["label" => "last-24-hours", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)"],
+    "week" => ["label" => "last-7-days", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"],
+    "month" => ["label" => "last-4-weeks", "condition" => "sr.created_at >= DATE_SUB(NOW(), INTERVAL 28 DAY)"],
+    "all" => ["label" => "all-time", "condition" => "1 = 1"],
 ];
-$selectedRange = $_GET["range"] ?? "all";
 
-if (!isset($rangeOptions[$selectedRange])) {
-    $selectedRange = "all";
-}
+$selectedRange = $_GET["range"] ?? "all";
+if (!isset($rangeOptions[$selectedRange])) $selectedRange = "all";
 
 $rangeCondition = $rangeOptions[$selectedRange]["condition"];
 $filename = "cropsense-collected-data-" . $rangeOptions[$selectedRange]["label"] . "-" . date("Y-m-d-His") . ".xls";
@@ -40,18 +24,24 @@ header("Expires: 0");
 
 $sql = "
     SELECT
+        sr.id,
         sr.created_at,
-        f.farm_name,
-        f.barangay,
-        d.device_name,
-        d.device_code,
         sr.soil_moisture,
         sr.soil_ph,
         sr.soil_ec,
         sr.nitrogen,
         sr.phosphorus,
         sr.potassium,
-        sr.temperature
+        sr.temperature,
+        sr.humidity,
+        sr.encrypted_payload,
+        sr.encryption_iv,
+        sr.encryption_tag,
+        sr.encryption_version,
+        f.farm_name,
+        f.barangay,
+        d.device_name,
+        d.device_code
     FROM sensor_readings sr
     INNER JOIN devices d ON d.id = sr.device_id
     INNER JOIN farms f ON f.id = sr.farm_id
@@ -79,6 +69,13 @@ echo "</tr></thead><tbody>";
 
 if ($result) {
     while ($row = $result->fetch_assoc()) {
+        try {
+            $row = cropsense_decrypt_sensor_from_database($row);
+        } catch (Throwable $error) {
+            error_log("Export AES decrypt failed for reading " . $row["id"] . ": " . $error->getMessage());
+            continue;
+        }
+
         echo "<tr>";
         echo "<td>" . htmlspecialchars($row["created_at"]) . "</td>";
         echo "<td>" . htmlspecialchars($row["farm_name"]) . "</td>";

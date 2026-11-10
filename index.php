@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . "/includes/security.php";
-require_once __DIR__ . "/config/app_url.php";
 
 cropsense_apply_security_headers("web");
 
@@ -17,10 +16,10 @@ $currentYear = date("Y");
 
     <title>CropSense | Smart Soil Monitoring and Crop Recommendations</title>
 
-    <link rel="icon" href="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>" type="image/svg+xml">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(cropsense_asset('css/bootstrap.min.css'), ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="icon" href="assets/img/cropsense-logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(cropsense_asset('css/public.css'), ENT_QUOTES, 'UTF-8'); ?>?v=20260819-landing-v2">
+    <link rel="stylesheet" href="assets/css/public.css?v=20260819-landing-v2">
 </head>
 
 <body class="public-site" id="home">
@@ -30,7 +29,7 @@ $currentYear = date("Y");
         <nav class="navbar navbar-expand-lg public-navbar" aria-label="Public navigation">
             <div class="container public-container">
                 <a class="public-brand" href="#home" aria-label="CropSense home">
-                    <img src="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>" alt="" width="44" height="44">
+                    <img src="assets/img/cropsense-logo.svg" alt="" width="44" height="44">
                     <span>
                         <strong>CropSense</strong>
                         <small>Smart Agriculture</small>
@@ -60,7 +59,7 @@ $currentYear = date("Y");
                         <li class="nav-item"><a class="nav-link" href="#project-purpose">About Project</a></li>
                     </ul>
 
-                    <a class="public-sign-in" href="<?php echo htmlspecialchars(cropsense_url('login.php'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <a class="public-sign-in" href="login.php">
                         Sign In
                         <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
                     </a>
@@ -100,7 +99,7 @@ $currentYear = date("Y");
                             </p>
 
                             <div class="hero-actions">
-                                <a class="public-button public-button-primary" href="<?php echo htmlspecialchars(cropsense_url('login.php'), ENT_QUOTES, 'UTF-8'); ?>">
+                                <a class="public-button public-button-primary" href="login.php">
                                     Sign In to CropSense
                                     <i class="bi bi-arrow-right" aria-hidden="true"></i>
                                 </a>
@@ -508,7 +507,7 @@ $currentYear = date("Y");
                             device status, historical records, and reports.
                         </p>
                     </div>
-                    <a class="public-button public-button-primary" href="<?php echo htmlspecialchars(cropsense_url('login.php'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <a class="public-button public-button-primary" href="login.php">
                         Sign In to CropSense
                         <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
@@ -521,7 +520,7 @@ $currentYear = date("Y");
         <div class="container public-container">
             <div class="footer-main">
                 <a class="public-brand footer-brand" href="#home" aria-label="CropSense home">
-                    <img src="<?php echo htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8'); ?>" alt="" width="44" height="44">
+                    <img src="assets/img/cropsense-logo.svg" alt="" width="44" height="44">
                     <span>
                         <strong>CropSense</strong>
                         <small>Smart Crop Recommendation and Monitoring System Using IoT Sensors</small>
@@ -532,7 +531,7 @@ $currentYear = date("Y");
                     <a href="#about">About</a>
                     <a href="#features">Features</a>
                     <a href="#technology">Technology</a>
-                    <a href="<?php echo htmlspecialchars(cropsense_url('login.php'), ENT_QUOTES, 'UTF-8'); ?>">Sign In</a>
+                    <a href="login.php">Sign In</a>
                 </nav>
             </div>
 
@@ -543,8 +542,8 @@ $currentYear = date("Y");
         </div>
     </footer>
 
-    <script src="<?php echo htmlspecialchars(cropsense_asset('js/bootstrap.bundle.min.js'), ENT_QUOTES, 'UTF-8'); ?>"></script>
-    <script src="<?php echo htmlspecialchars(cropsense_asset('js/public.js'), ENT_QUOTES, 'UTF-8'); ?>?v=20260819-landing-v1"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/public.js?v=20260819-landing-v1"></script>
 </body>
 
 </html>

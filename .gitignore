@@ -1,34 +1,4 @@
-# Local configuration and secrets
 config/database.local.php
 config/security.local.php
-config/mail.local.php
 .env
-.env.*
-
-# ESP32 Wi-Fi credentials and API keys
-device/**/secrets.h
-
-# Deployment filesgit check-ignore -v -- device/CropSense_ESP32_Dashboard/secrets.h
 deploy/
-
-# Runtime uploads
-uploads/*
-!uploads/.gitkeep
-
-# Editor settings
-.vscode/
-.idea/
-
-# Operating-system files
-Thumbs.db
-.DS_Store
-
-# Logs and temporary files
-*.log
-tmp/
-temp/
-
-# Arduino compiled files
-build/
-*.bin
-*.elf

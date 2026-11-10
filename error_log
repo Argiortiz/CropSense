@@ -1,0 +1,70 @@
+[27-Oct-2026 11:29:39 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "CROPSENSE_RECAPTCHA_SITE_KEY" in /home/u910796166/domains/cropsense.site/public_html/login.php:242
+Stack trace:
+#0 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/login.php on line 242
+[27-Oct-2026 11:31:51 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "CROPSENSE_RECAPTCHA_SITE_KEY" in /home/u910796166/domains/cropsense.site/public_html/login.php:242
+Stack trace:
+#0 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/login.php on line 242
+[27-Oct-2026 11:54:27 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:54:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:54:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:55:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:55:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:56:23 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 11:57:21 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 12:07:19 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 12:07:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 /home/u910796166/domains/cropsense.site/public_html/debug_dashboard_9816311c95.php(28): require('/home/u91079616...')
+#2 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 12:08:12 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function cropsense_enforce_session_timeout() in /home/u910796166/domains/cropsense.site/public_html/includes/session.php:19
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(3): require_once()
+#1 /home/u910796166/domains/cropsense.site/public_html/debug_dashboard_9816311c95.php(28): require('/home/u91079616...')
+#2 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/session.php on line 19
+[27-Oct-2026 20:13:03 Asia/Manila] PHP Fatal error:  Uncaught Error: Undefined constant "CROPSENSE_SESSION_IDLE_SECONDS" in /home/u910796166/domains/cropsense.site/public_html/includes/header.php:30
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(186): include()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/header.php on line 30
+[27-Oct-2026 20:15:22 Asia/Manila] PHP Fatal error:  Uncaught Error: Undefined constant "CROPSENSE_SESSION_IDLE_SECONDS" in /home/u910796166/domains/cropsense.site/public_html/includes/header.php:30
+Stack trace:
+#0 /home/u910796166/domains/cropsense.site/public_html/dashboard.php(186): include()
+#1 {main}
+  thrown in /home/u910796166/domains/cropsense.site/public_html/includes/header.php on line 30
